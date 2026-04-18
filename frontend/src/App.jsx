@@ -90,17 +90,17 @@ function App() {
                   <div className="mb-3">
                     <label>Title *</label>
                     <input type="text" name="title" className="form-control"
-                           value={formData.title} onChange={handleChange} placeholder="Enter book title"  required />
+                           value={formData.title} onChange={handleChange} required />
                   </div>
                   <div className="mb-3">
                     <label>ISBN</label>
                     <input type="text" name="isbn" className="form-control"
-                           value={formData.isbn} placeholder="978-3-16-148410-0"  onChange={handleChange} />
+                           value={formData.isbn} onChange={handleChange} />
                   </div>
                   <div className="mb-3">
                     <label>Publication Year</label>
                     <input type="number" name="publicationYear" className="form-control"
-                           value={formData.publicationYear} placeholder="2024"  onChange={handleChange} />
+                           value={formData.publicationYear} onChange={handleChange} />
                   </div>
                   <div className="mb-3">
                     <label>Author *</label>

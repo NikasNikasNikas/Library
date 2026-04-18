@@ -20,7 +20,7 @@ public class Category {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @ManyToMany(mappedBy = "categories")
-    @JsonIgnore  // This breaks the circular reference
+    @ManyToMany(mappedBy = "categories", fetch = FetchType.EAGER)
+    @JsonIgnore
     private Set<Book> books = new HashSet<>();
 }
