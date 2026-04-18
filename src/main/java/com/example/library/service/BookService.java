@@ -6,6 +6,7 @@ import com.example.library.entity.Author;
 import com.example.library.entity.Book;
 import com.example.library.repository.AuthorRepository;
 import com.example.library.repository.BookRepository;
+import com.example.library.repository.mybatis.BookMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,27 +15,51 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class BookService {
 
-    private final BookRepository bookRepository;
+    private final BookRepository jpaBookRepository;
     private final AuthorRepository authorRepository;
+    private final BookMapper myBatisBookMapper;
 
     @Transactional
-    public BookResponseDTO createBook(BookRequestDTO requestDTO) {
-        Author author = authorRepository.findById(requestDTO.getAuthorId())
-                .orElseThrow(() -> new RuntimeException("Author not found with id: " + requestDTO.getAuthorId()));
+    public BookResponseDTO createBookWithJPA(BookRequestDTO dto) {
+        Author author = authorRepository.findById(dto.getAuthorId())
+                .orElseThrow(() -> new RuntimeException("Author not found"));
 
         Book book = new Book();
-        book.setTitle(requestDTO.getTitle());
-        book.setIsbn(requestDTO.getIsbn());
-        book.setPublicationYear(requestDTO.getPublicationYear());
+        book.setTitle(dto.getTitle());
+        book.setIsbn(dto.getIsbn());
+        book.setPublicationYear(dto.getPublicationYear());
         book.setAuthor(author);
 
-        Book saved = bookRepository.save(book);
+        Book saved = jpaBookRepository.save(book);
 
         BookResponseDTO response = new BookResponseDTO();
         response.setId(saved.getId());
         response.setTitle(saved.getTitle());
         response.setIsbn(saved.getIsbn());
         response.setPublicationYear(saved.getPublicationYear());
+        response.setAuthorName(author.getName());
+
+        return response;
+    }
+
+    @Transactional
+    public BookResponseDTO createBookWithMyBatis(BookRequestDTO dto) {
+        Author author = authorRepository.findById(dto.getAuthorId())
+                .orElseThrow(() -> new RuntimeException("Author not found"));
+
+        Book book = new Book();
+        book.setTitle(dto.getTitle());
+        book.setIsbn(dto.getIsbn());
+        book.setPublicationYear(dto.getPublicationYear());
+        book.setAuthor(author);
+
+        myBatisBookMapper.insert(book);
+
+        BookResponseDTO response = new BookResponseDTO();
+        response.setId(book.getId());
+        response.setTitle(book.getTitle());
+        response.setIsbn(book.getIsbn());
+        response.setPublicationYear(book.getPublicationYear());
         response.setAuthorName(author.getName());
 
         return response;

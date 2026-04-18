@@ -7,7 +7,6 @@ import com.example.library.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -25,11 +24,10 @@ public class CategoryService {
     }
 
     @Transactional
-    public CategoryResponseDTO createCategory(CategoryRequestDTO requestDTO) {
+    public CategoryResponseDTO createCategory(CategoryRequestDTO dto) {
         Category category = new Category();
-        category.setName(requestDTO.getName());
-        category.setDescription(requestDTO.getDescription());
-
+        category.setName(dto.getName());
+        category.setDescription(dto.getDescription());
         Category saved = categoryRepository.save(category);
         return convertToDTO(saved);
     }

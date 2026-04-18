@@ -26,12 +26,7 @@ public class AuthorService {
                 .collect(Collectors.toList());
     }
 
-    @Transactional(readOnly = true)
-    public AuthorResponseDTO getAuthorById(Long id) {
-        Author author = authorRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Author not found with id: " + id));
-        return convertToDTO(author);
-    }
+
 
     @Transactional
     public AuthorResponseDTO createAuthor(AuthorRequestDTO requestDTO) {
@@ -64,12 +59,6 @@ public class AuthorService {
         authorRepository.delete(author);
     }
 
-    @Transactional(readOnly = true)
-    public List<AuthorResponseDTO> getAuthorsByCountry(String country) {
-        return authorRepository.findByCountry(country).stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
-    }
 
     private AuthorResponseDTO convertToDTO(Author author) {
         AuthorResponseDTO dto = new AuthorResponseDTO();
@@ -78,7 +67,7 @@ public class AuthorService {
         dto.setBirthDate(author.getBirthDate());
         dto.setCountry(author.getCountry());
 
-        if (author.getBooks() != null && !author.getBooks().isEmpty()) {
+        if (author.getBooks() != null) {
             List<BookResponseDTO> bookDTOs = author.getBooks().stream()
                     .map(this::convertBookToDTO)
                     .collect(Collectors.toList());
@@ -94,11 +83,9 @@ public class AuthorService {
         dto.setTitle(book.getTitle());
         dto.setIsbn(book.getIsbn());
         dto.setPublicationYear(book.getPublicationYear());
-
         if (book.getAuthor() != null) {
             dto.setAuthorName(book.getAuthor().getName());
         }
-
         return dto;
     }
 }

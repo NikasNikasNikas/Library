@@ -1,17 +1,14 @@
 package com.example.library.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
 @Table(name = "categories")
 @Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -24,5 +21,6 @@ public class Category {
     private String description;
 
     @ManyToMany(mappedBy = "categories")
+    @JsonIgnore  // This breaks the circular reference
     private Set<Book> books = new HashSet<>();
 }

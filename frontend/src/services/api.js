@@ -14,7 +14,8 @@ export const authorAPI = {
 };
 
 export const bookAPI = {
-    create: (book) => api.post('/books', book),
+    createWithJPA: (book) => api.post('/books/jpa', book),
+    createWithMyBatis: (book) => api.post('/books/mybatis', book),
 };
 
 export default api;
