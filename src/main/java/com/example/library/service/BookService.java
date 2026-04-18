@@ -37,7 +37,7 @@ public class BookService {
         response.setTitle(saved.getTitle());
         response.setIsbn(saved.getIsbn());
         response.setPublicationYear(saved.getPublicationYear());
-        response.setAuthorName(author.getName());
+        response.setAuthorName(author.getName());  // Set author name
 
         return response;
     }
@@ -60,7 +60,7 @@ public class BookService {
         response.setTitle(book.getTitle());
         response.setIsbn(book.getIsbn());
         response.setPublicationYear(book.getPublicationYear());
-        response.setAuthorName(author.getName());
+        response.setAuthorName(author.getName());  // Set author name
 
         return response;
     }

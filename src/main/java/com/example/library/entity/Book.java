@@ -1,8 +1,8 @@
 package com.example.library.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Data;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -23,12 +23,12 @@ public class Book {
     @Column(name = "publication_year")
     private Integer publicationYear;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "author_id", nullable = false)
-    @JsonIgnore
+    @JsonIgnore  // This prevents infinite recursion
     private Author author;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "book_categories",
             joinColumns = @JoinColumn(name = "book_id"),

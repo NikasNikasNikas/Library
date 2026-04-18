@@ -1,8 +1,8 @@
 package com.example.library.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Data;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -21,6 +21,6 @@ public class Category {
     private String description;
 
     @ManyToMany(mappedBy = "categories")
-    @JsonIgnore  // This breaks the circular reference
+    @JsonIgnore  // This prevents infinite recursion
     private Set<Book> books = new HashSet<>();
 }
