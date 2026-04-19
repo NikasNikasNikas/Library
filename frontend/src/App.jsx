@@ -24,7 +24,7 @@ function App() {
     setLoading(true);
     try {
       const response = await authorAPI.getAll();
-      console.log('Loaded authors:', response.data); // Debug log
+      console.log('Loaded authors:', response.data);
       setAuthors(response.data);
     } catch (error) {
       console.error('Error:', error);
@@ -59,7 +59,8 @@ function App() {
       }
       setFormData({ title: '', isbn: '', publicationYear: '', authorId: '' });
       setShowForm(false);
-      await loadAuthors(); // Refresh after creating
+      await loadAuthors();
+      await loadCategories(); // Reload categories to update their book lists
       setViewMode('authors');
       setSelectedAuthor(null);
     } catch (error) {
@@ -85,6 +86,7 @@ function App() {
       await bookAPI.addCategory(bookId, selectedCategoryId);
       alert('Category added to book successfully!');
       await loadAuthors(); // Reload all authors to get updated data
+      await loadCategories(); // Reload categories to update their book lists
       // Update selected author data
       const updatedAuthor = authors.find(a => a.id === selectedAuthor?.id);
       if (updatedAuthor) {
@@ -100,13 +102,14 @@ function App() {
 
   return (
       <div className="container mt-4">
-        <h1 className="text-center mb-4">📚 Library System</h1>
+        <h1 className="text-center mb-4">📚 Library Management System</h1>
 
         <div className="alert alert-info mb-4">
-          <strong>✅ Features:</strong><br/>
-          • Add categories to existing books<br/>
-          • View categories under each book<br/>
-          • Many-to-many relationship (Books ↔ Categories)
+          <strong>✅ Many-to-Many Relationship Demo:</strong><br/>
+          • Top: Authors and their Books (One-to-Many)<br/>
+          • Bottom: Categories and their Books (Many-to-Many)<br/>
+          • Click on author to see their books<br/>
+          • Add categories to existing books
         </div>
 
         <div className="text-center mb-4">
@@ -150,8 +153,8 @@ function App() {
                   <div className="mb-3">
                     <label>DAO Method</label>
                     <select className="form-select" value={useMethod} onChange={(e) => setUseMethod(e.target.value)}>
-                      <option value="jpa">JPA/Hibernate</option>
-                      <option value="mybatis">MyBatis</option>
+                      <option value="jpa">JPA/Hibernate (3.3.1)</option>
+                      <option value="mybatis">MyBatis (3.3.2)</option>
                     </select>
                   </div>
                   <button type="submit" className="btn btn-success">Create Book</button>
@@ -160,9 +163,10 @@ function App() {
             </div>
         )}
 
+        {/* Authors Section - One-to-Many Relationship */}
         {viewMode === 'authors' ? (
             <>
-              <h2>Authors (Click to see their books)</h2>
+              <h2 className="mb-3">📖 Authors and Their Books (One-to-Many)</h2>
               <div className="row">
                 {loading ? <div>Loading...</div> : authors.map(author => (
                     <div key={author.id} className="col-md-6 mb-3">
@@ -170,6 +174,7 @@ function App() {
                         <div className="card-body">
                           <h3>{author.name}</h3>
                           <p>Country: {author.country || 'N/A'}</p>
+                          <p>Birth Date: {author.birthDate || 'N/A'}</p>
                           <p>Books: {author.books?.length || 0}</p>
                           <button className="btn btn-info btn-sm">View Books →</button>
                         </div>
@@ -184,7 +189,7 @@ function App() {
                 ← Back to Authors
               </button>
               {selectedAuthor && (
-                  <div className="card">
+                  <div className="card mb-4">
                     <div className="card-header bg-info text-white">
                       <h3>Books by {selectedAuthor.name}</h3>
                     </div>
@@ -262,6 +267,48 @@ function App() {
               )}
             </>
         )}
+
+        {/* NEW: Categories Section - Many-to-Many Relationship (Shows what books each category has) */}
+        <div className="mt-5">
+          <hr className="my-4" />
+          <h2 className="mb-3">🏷️ Categories and Their Books (Many-to-Many)</h2>
+          <div className="row">
+            {categories.length === 0 ? (
+                <div className="alert alert-info">No categories found. Add categories to see the many-to-many relationship.</div>
+            ) : (
+                categories.map(category => (
+                    <div key={category.id} className="col-md-6 mb-3">
+                      <div className="card h-100">
+                        <div className="card-header bg-success text-white">
+                          <h4 className="mb-0">{category.name}</h4>
+                          {category.description && <small>{category.description}</small>}
+                        </div>
+                        <div className="card-body">
+                          <h5>Books in this category:</h5>
+                          {category.books && category.books.length > 0 ? (
+                              <ul className="list-group">
+                                {category.books.map(book => (
+                                    <li key={book.id} className="list-group-item">
+                                      <strong>{book.title}</strong>
+                                      {book.author && (
+                                          <span className="text-muted ms-2">by {book.author.name}</span>
+                                      )}
+                                      {book.publicationYear && (
+                                          <span className="text-muted ms-2">({book.publicationYear})</span>
+                                      )}
+                                    </li>
+                                ))}
+                              </ul>
+                          ) : (
+                              <p className="text-muted">No books in this category yet.</p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                ))
+            )}
+          </div>
+        </div>
       </div>
   );
 }
