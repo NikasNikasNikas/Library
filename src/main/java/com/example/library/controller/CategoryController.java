@@ -3,6 +3,7 @@ package com.example.library.controller;
 import com.example.library.dto.CategoryRequestDTO;
 import com.example.library.dto.CategoryResponseDTO;
 import com.example.library.service.CategoryService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -21,7 +22,7 @@ public class CategoryController {
     }
 
     @PostMapping
-    public CategoryResponseDTO createCategory(@RequestBody CategoryRequestDTO dto) {
+    public CategoryResponseDTO createCategory(@Valid @RequestBody CategoryRequestDTO dto) {
         return categoryService.createCategory(dto);
     }
 }

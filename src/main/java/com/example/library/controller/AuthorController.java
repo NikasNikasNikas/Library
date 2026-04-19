@@ -1,7 +1,7 @@
 package com.example.library.controller;
 
-import com.example.library.entity.Author;
-import com.example.library.repository.AuthorRepository;
+import com.example.library.dto.AuthorResponseDTO;
+import com.example.library.service.AuthorService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
@@ -12,10 +12,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AuthorController {
 
-    private final AuthorRepository authorRepository;
+    private final AuthorService authorService;
 
     @GetMapping
-    public List<Author> getAllAuthors() {
-        return authorRepository.findAllWithBooks();
+    public List<AuthorResponseDTO> getAllAuthors() {
+        return authorService.getAllAuthors();
     }
 }

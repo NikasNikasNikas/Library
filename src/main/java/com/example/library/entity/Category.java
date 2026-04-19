@@ -1,14 +1,16 @@
 package com.example.library.entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Getter;
+import lombok.Setter;
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
 @Table(name = "categories")
-@Data
+@Getter
+@Setter
 public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,7 +22,7 @@ public class Category {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @ManyToMany(mappedBy = "categories", fetch = FetchType.EAGER)
+    @ManyToMany(mappedBy = "categories")
     @JsonIgnore
     private Set<Book> books = new HashSet<>();
 }

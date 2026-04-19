@@ -18,7 +18,9 @@ public class CategoryService {
 
     @Transactional(readOnly = true)
     public List<CategoryResponseDTO> getAllCategories() {
-        return categoryRepository.findAll().stream()
+        List<Category> categories = categoryRepository.findAll();
+
+        return categories.stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
@@ -37,6 +39,24 @@ public class CategoryService {
         dto.setId(category.getId());
         dto.setName(category.getName());
         dto.setDescription(category.getDescription());
+
+        // Add books if needed
+        if (category.getBooks() != null && !category.getBooks().isEmpty()) {
+            List<CategoryResponseDTO.BookInfo> bookDTOs = category.getBooks().stream()
+                    .map(book -> {
+                        CategoryResponseDTO.BookInfo bookInfo = new CategoryResponseDTO.BookInfo();
+                        bookInfo.setId(book.getId());
+                        bookInfo.setTitle(book.getTitle());
+                        bookInfo.setPublicationYear(book.getPublicationYear());
+                        if (book.getAuthor() != null) {
+                            bookInfo.setAuthorName(book.getAuthor().getName());
+                        }
+                        return bookInfo;
+                    })
+                    .collect(Collectors.toList());
+            dto.setBooks(bookDTOs);
+        }
+
         return dto;
     }
 }
