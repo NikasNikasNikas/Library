@@ -1,14 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { authorAPI, bookAPI } from './services/api';
+import { authorAPI, bookAPI, categoryAPI } from './services/api';
 
 function App() {
   const [authors, setAuthors] = useState([]);
+  const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [useMethod, setUseMethod] = useState('jpa');
   const [selectedAuthor, setSelectedAuthor] = useState(null);
   const [viewMode, setViewMode] = useState('authors');
+  const [selectedBookForCategory, setSelectedBookForCategory] = useState(null);
+  const [selectedCategoryId, setSelectedCategoryId] = useState('');
+
   const [formData, setFormData] = useState({
     title: '',
     isbn: '',
@@ -20,6 +24,7 @@ function App() {
     setLoading(true);
     try {
       const response = await authorAPI.getAll();
+      console.log('Loaded authors:', response.data); // Debug log
       setAuthors(response.data);
     } catch (error) {
       console.error('Error:', error);
@@ -28,8 +33,18 @@ function App() {
     }
   };
 
+  const loadCategories = async () => {
+    try {
+      const response = await categoryAPI.getAll();
+      setCategories(response.data);
+    } catch (error) {
+      console.error('Error loading categories:', error);
+    }
+  };
+
   useEffect(() => {
     loadAuthors();
+    loadCategories();
   }, []);
 
   const handleSubmit = async (e) => {
@@ -44,7 +59,7 @@ function App() {
       }
       setFormData({ title: '', isbn: '', publicationYear: '', authorId: '' });
       setShowForm(false);
-      loadAuthors();
+      await loadAuthors(); // Refresh after creating
       setViewMode('authors');
       setSelectedAuthor(null);
     } catch (error) {
@@ -61,17 +76,37 @@ function App() {
     setViewMode('books');
   };
 
+  const handleAddCategory = async (bookId) => {
+    if (!selectedCategoryId) {
+      alert('Please select a category');
+      return;
+    }
+    try {
+      await bookAPI.addCategory(bookId, selectedCategoryId);
+      alert('Category added to book successfully!');
+      await loadAuthors(); // Reload all authors to get updated data
+      // Update selected author data
+      const updatedAuthor = authors.find(a => a.id === selectedAuthor?.id);
+      if (updatedAuthor) {
+        setSelectedAuthor(updatedAuthor);
+      }
+      setSelectedBookForCategory(null);
+      setSelectedCategoryId('');
+    } catch (error) {
+      console.error('Error adding category:', error);
+      alert('Error adding category to book');
+    }
+  };
+
   return (
       <div className="container mt-4">
         <h1 className="text-center mb-4">📚 Library System</h1>
 
         <div className="alert alert-info mb-4">
-          <strong>✅ Requirements Met:</strong><br/>
-          • Business component: @Service<br/>
-          • JPA DAO + MyBatis DAO<br/>
-          • @Transactional transactions<br/>
-          • One-to-many: Author → Books (click to navigate)<br/>
-          • Form with data binding
+          <strong>✅ Features:</strong><br/>
+          • Add categories to existing books<br/>
+          • View categories under each book<br/>
+          • Many-to-many relationship (Books ↔ Categories)
         </div>
 
         <div className="text-center mb-4">
@@ -90,17 +125,17 @@ function App() {
                   <div className="mb-3">
                     <label>Title *</label>
                     <input type="text" name="title" className="form-control"
-                           value={formData.title} onChange={handleChange} placeholder="Enter book title"  required />
+                           value={formData.title} onChange={handleChange} required />
                   </div>
                   <div className="mb-3">
                     <label>ISBN</label>
                     <input type="text" name="isbn" className="form-control"
-                           value={formData.isbn} placeholder="978-3-16-148410-0"  onChange={handleChange} />
+                           value={formData.isbn} onChange={handleChange} />
                   </div>
                   <div className="mb-3">
                     <label>Publication Year</label>
                     <input type="number" name="publicationYear" className="form-control"
-                           value={formData.publicationYear} placeholder="2024"  onChange={handleChange} />
+                           value={formData.publicationYear} onChange={handleChange} />
                   </div>
                   <div className="mb-3">
                     <label>Author *</label>
@@ -115,8 +150,8 @@ function App() {
                   <div className="mb-3">
                     <label>DAO Method</label>
                     <select className="form-select" value={useMethod} onChange={(e) => setUseMethod(e.target.value)}>
-                      <option value="jpa">JPA/Hibernate (3.3.1)</option>
-                      <option value="mybatis">MyBatis (3.3.2)</option>
+                      <option value="jpa">JPA/Hibernate</option>
+                      <option value="mybatis">MyBatis</option>
                     </select>
                   </div>
                   <button type="submit" className="btn btn-success">Create Book</button>
@@ -155,21 +190,73 @@ function App() {
                     </div>
                     <div className="card-body">
                       {selectedAuthor.books?.length > 0 ? (
-                          <table className="table">
-                            <thead>
-                            <tr><th>Title</th><th>ISBN</th><th>Year</th></tr>
-                            </thead>
-                            <tbody>
-                            {selectedAuthor.books.map(book => (
-                                <tr key={book.id}>
-                                  <td>{book.title}</td>
-                                  <td>{book.isbn || 'N/A'}</td>
-                                  <td>{book.publicationYear || 'N/A'}</td>
-                                </tr>
-                            ))}
-                            </tbody>
-                          </table>
-                      ) : <p>No books yet</p>}
+                          selectedAuthor.books.map(book => (
+                              <div key={book.id} className="card mb-3">
+                                <div className="card-body">
+                                  <h4>{book.title}</h4>
+                                  <p>ISBN: {book.isbn || 'N/A'} | Year: {book.publicationYear || 'N/A'}</p>
+
+                                  {/* Display categories */}
+                                  <div className="mb-2">
+                                    <strong>Categories:</strong>
+                                    {book.categoryNames && book.categoryNames.length > 0 ? (
+                                        <div className="mt-1">
+                                          {book.categoryNames.map((catName, index) => (
+                                              <span key={index} className="badge bg-secondary me-1">
+                                                                    {catName}
+                                                                </span>
+                                          ))}
+                                        </div>
+                                    ) : (
+                                        <span className="text-muted ms-2"> No categories yet</span>
+                                    )}
+                                  </div>
+
+                                  {/* Add category button */}
+                                  {selectedBookForCategory === book.id ? (
+                                      <div className="mt-2">
+                                        <select
+                                            className="form-select mb-2"
+                                            value={selectedCategoryId}
+                                            onChange={(e) => setSelectedCategoryId(e.target.value)}
+                                        >
+                                          <option value="">Select a category...</option>
+                                          {categories.map(cat => (
+                                              <option key={cat.id} value={cat.id}>
+                                                {cat.name}
+                                              </option>
+                                          ))}
+                                        </select>
+                                        <button
+                                            className="btn btn-sm btn-success me-2"
+                                            onClick={() => handleAddCategory(book.id)}
+                                        >
+                                          Confirm Add
+                                        </button>
+                                        <button
+                                            className="btn btn-sm btn-secondary"
+                                            onClick={() => {
+                                              setSelectedBookForCategory(null);
+                                              setSelectedCategoryId('');
+                                            }}
+                                        >
+                                          Cancel
+                                        </button>
+                                      </div>
+                                  ) : (
+                                      <button
+                                          className="btn btn-sm btn-warning"
+                                          onClick={() => setSelectedBookForCategory(book.id)}
+                                      >
+                                        + Add Category to this Book
+                                      </button>
+                                  )}
+                                </div>
+                              </div>
+                          ))
+                      ) : (
+                          <p>No books yet for this author.</p>
+                      )}
                     </div>
                   </div>
               )}

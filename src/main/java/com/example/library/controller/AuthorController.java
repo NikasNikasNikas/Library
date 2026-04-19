@@ -4,10 +4,12 @@ import com.example.library.dto.AuthorResponseDTO;
 import com.example.library.dto.BookResponseDTO;
 import com.example.library.entity.Author;
 import com.example.library.entity.Book;
+import com.example.library.entity.Category;
 import com.example.library.repository.AuthorRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @RestController
@@ -22,27 +24,48 @@ public class AuthorController {
     public List<AuthorResponseDTO> getAllAuthors() {
         List<Author> authors = authorRepository.findAllWithBooks();
 
-        return authors.stream().map(author -> {
-            AuthorResponseDTO dto = new AuthorResponseDTO();
-            dto.setId(author.getId());
-            dto.setName(author.getName());
-            dto.setCountry(author.getCountry());
-            dto.setBirthDate(author.getBirthDate());
+        return authors.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
 
-            // Convert books to DTOs
-            if (author.getBooks() != null) {
-                List<BookResponseDTO> bookDTOs = author.getBooks().stream().map(book -> {
-                    BookResponseDTO bookDTO = new BookResponseDTO();
-                    bookDTO.setId(book.getId());
-                    bookDTO.setTitle(book.getTitle());
-                    bookDTO.setIsbn(book.getIsbn());
-                    bookDTO.setPublicationYear(book.getPublicationYear());
-                    return bookDTO;
-                }).collect(Collectors.toList());
-                dto.setBooks(bookDTOs);
-            }
+    private AuthorResponseDTO convertToDTO(Author author) {
+        AuthorResponseDTO dto = new AuthorResponseDTO();
+        dto.setId(author.getId());
+        dto.setName(author.getName());
+        dto.setBirthDate(author.getBirthDate());
+        dto.setCountry(author.getCountry());
 
-            return dto;
-        }).collect(Collectors.toList());
+        if (author.getBooks() != null && !author.getBooks().isEmpty()) {
+            List<BookResponseDTO> bookDTOs = author.getBooks().stream()
+                    .map(this::convertBookToDTO)
+                    .collect(Collectors.toList());
+            dto.setBooks(bookDTOs);
+        }
+
+        return dto;
+    }
+
+    private BookResponseDTO convertBookToDTO(Book book) {
+        BookResponseDTO dto = new BookResponseDTO();
+        dto.setId(book.getId());
+        dto.setTitle(book.getTitle());
+        dto.setIsbn(book.getIsbn());
+        dto.setPublicationYear(book.getPublicationYear());
+
+        // Set author name
+        if (book.getAuthor() != null) {
+            dto.setAuthorName(book.getAuthor().getName());
+        }
+
+        // Set category names
+        if (book.getCategories() != null && !book.getCategories().isEmpty()) {
+            Set<String> categoryNames = book.getCategories().stream()
+                    .map(Category::getName)
+                    .collect(Collectors.toSet());
+            dto.setCategoryNames(categoryNames);
+        }
+
+        return dto;
     }
 }

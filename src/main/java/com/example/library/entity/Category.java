@@ -2,13 +2,15 @@ package com.example.library.entity;
 
 import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import java.util.HashSet;
 import java.util.Set;
 
 @Entity
 @Table(name = "categories")
-@Data
+@Getter
+@Setter
 public class Category {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,6 +23,6 @@ public class Category {
     private String description;
 
     @ManyToMany(mappedBy = "categories")
-    @JsonIgnore  // This prevents infinite recursion
+    @JsonIgnore
     private Set<Book> books = new HashSet<>();
 }
