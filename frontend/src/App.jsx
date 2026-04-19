@@ -12,6 +12,7 @@ function App() {
   const [viewMode, setViewMode] = useState('authors');
   const [selectedBookForCategory, setSelectedBookForCategory] = useState(null);
   const [selectedCategoryId, setSelectedCategoryId] = useState('');
+  const [refreshKey, setRefreshKey] = useState(0); // Force re-render
 
   const [formData, setFormData] = useState({
     title: '',
@@ -26,6 +27,14 @@ function App() {
       const response = await authorAPI.getAll();
       console.log('Loaded authors:', response.data);
       setAuthors(response.data);
+
+      // If we have a selected author, update it with fresh data
+      if (selectedAuthor) {
+        const freshAuthor = response.data.find(a => a.id === selectedAuthor.id);
+        if (freshAuthor) {
+          setSelectedAuthor(freshAuthor);
+        }
+      }
     } catch (error) {
       console.error('Error:', error);
     } finally {
@@ -45,7 +54,7 @@ function App() {
   useEffect(() => {
     loadAuthors();
     loadCategories();
-  }, []);
+  }, [refreshKey]); // Re-run when refreshKey changes
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -60,9 +69,10 @@ function App() {
       setFormData({ title: '', isbn: '', publicationYear: '', authorId: '' });
       setShowForm(false);
       await loadAuthors();
-      await loadCategories(); // Reload categories to update their book lists
+      await loadCategories();
       setViewMode('authors');
       setSelectedAuthor(null);
+      setRefreshKey(prev => prev + 1); // Force refresh
     } catch (error) {
       alert('Error creating book');
     }
@@ -75,6 +85,8 @@ function App() {
   const handleAuthorClick = (author) => {
     setSelectedAuthor(author);
     setViewMode('books');
+    setSelectedBookForCategory(null); // Reset category selection
+    setSelectedCategoryId('');
   };
 
   const handleAddCategory = async (bookId) => {
@@ -82,35 +94,33 @@ function App() {
       alert('Please select a category');
       return;
     }
+
+    console.log('Adding category:', { bookId, selectedCategoryId });
+
     try {
       await bookAPI.addCategory(bookId, selectedCategoryId);
       alert('Category added to book successfully!');
-      await loadAuthors(); // Reload all authors to get updated data
-      await loadCategories(); // Reload categories to update their book lists
-      // Update selected author data
-      const updatedAuthor = authors.find(a => a.id === selectedAuthor?.id);
-      if (updatedAuthor) {
-        setSelectedAuthor(updatedAuthor);
-      }
+
+      // Reload all data
+      await loadAuthors();
+      await loadCategories();
+
+      // Force a re-render
+      setRefreshKey(prev => prev + 1);
+
+      // Reset form
       setSelectedBookForCategory(null);
       setSelectedCategoryId('');
+
     } catch (error) {
       console.error('Error adding category:', error);
-      alert('Error adding category to book');
+      alert('Error adding category to book: ' + (error.response?.data || error.message));
     }
   };
 
   return (
       <div className="container mt-4">
-        <h1 className="text-center mb-4">📚 Library Management System</h1>
-
-        <div className="alert alert-info mb-4">
-          <strong>✅ Many-to-Many Relationship Demo:</strong><br/>
-          • Top: Authors and their Books (One-to-Many)<br/>
-          • Bottom: Categories and their Books (Many-to-Many)<br/>
-          • Click on author to see their books<br/>
-          • Add categories to existing books
-        </div>
+        <h1 className="text-center mb-4">Library Management System</h1>
 
         <div className="text-center mb-4">
           <button className="btn btn-primary" onClick={() => setShowForm(!showForm)}>
@@ -153,8 +163,8 @@ function App() {
                   <div className="mb-3">
                     <label>DAO Method</label>
                     <select className="form-select" value={useMethod} onChange={(e) => setUseMethod(e.target.value)}>
-                      <option value="jpa">JPA/Hibernate (3.3.1)</option>
-                      <option value="mybatis">MyBatis (3.3.2)</option>
+                      <option value="jpa">JPA/Hibernate</option>
+                      <option value="mybatis">MyBatis</option>
                     </select>
                   </div>
                   <button type="submit" className="btn btn-success">Create Book</button>
@@ -185,31 +195,36 @@ function App() {
             </>
         ) : (
             <>
-              <button className="btn btn-secondary mb-3" onClick={() => setViewMode('authors')}>
+              <button className="btn btn-secondary mb-3" onClick={() => {
+                setViewMode('authors');
+                setSelectedAuthor(null);
+                setSelectedBookForCategory(null);
+              }}>
                 ← Back to Authors
               </button>
               {selectedAuthor && (
                   <div className="card mb-4">
-                    <div className="card-header bg-info text-white">
+                    <div className="card-header bg-success text-white">
                       <h3>Books by {selectedAuthor.name}</h3>
                     </div>
                     <div className="card-body">
+                      {/* Books display for selected author */}
                       {selectedAuthor.books?.length > 0 ? (
                           selectedAuthor.books.map(book => (
-                              <div key={book.id} className="card mb-3">
+                              <div key={`book-${book.id}`} className="card mb-3">  {/* Use unique key with prefix */}
                                 <div className="card-body">
                                   <h4>{book.title}</h4>
                                   <p>ISBN: {book.isbn || 'N/A'} | Year: {book.publicationYear || 'N/A'}</p>
 
-                                  {/* Display categories */}
+                                  {/* Display categories - this is fine */}
                                   <div className="mb-2">
                                     <strong>Categories:</strong>
                                     {book.categoryNames && book.categoryNames.length > 0 ? (
                                         <div className="mt-1">
-                                          {book.categoryNames.map((catName, index) => (
-                                              <span key={index} className="badge bg-secondary me-1">
-                                                                    {catName}
-                                                                </span>
+                                          {book.categoryNames.map((catName, idx) => (
+                                              <span key={`${book.id}-cat-${idx}`} className="badge bg-secondary me-1">
+                                    {catName}
+                                </span>
                                           ))}
                                         </div>
                                     ) : (
@@ -217,7 +232,7 @@ function App() {
                                     )}
                                   </div>
 
-                                  {/* Add category button */}
+                                  {/* Add category button - keep as is */}
                                   {selectedBookForCategory === book.id ? (
                                       <div className="mt-2">
                                         <select
@@ -250,7 +265,7 @@ function App() {
                                       </div>
                                   ) : (
                                       <button
-                                          className="btn btn-sm btn-warning"
+                                          className="btn btn-sm btn-primary"
                                           onClick={() => setSelectedBookForCategory(book.id)}
                                       >
                                         + Add Category to this Book
@@ -268,11 +283,10 @@ function App() {
             </>
         )}
 
-
-        {/* NEW: Categories Section - Many-to-Many Relationship (Shows what books each category has) */}
+        {/* Categories Section - Many-to-Many Relationship */}
         <div className="mt-5">
           <hr className="my-4" />
-          <h2 className="mb-3">🏷️ Categories and Their Books (Many-to-Many)</h2>
+          <h2 className="mb-3">Categories and Their Books</h2>
           <div className="row">
             {categories.length === 0 ? (
                 <div className="alert alert-info">No categories found. Add categories to see the many-to-many relationship.</div>
@@ -281,18 +295,18 @@ function App() {
                     <div key={category.id} className="col-md-6 mb-3">
                       <div className="card h-100">
                         <div className="card-header bg-success text-white">
-                          <h4 className="mb-0">{category.name}</h4>
-                          {category.description && <small>{category.description}</small>}
+                          <h4 className="mb-0">{category.description}</h4>
+                          {category.name && <small>{category.name}</small>}
                         </div>
                         <div className="card-body">
                           <h5>Books in this category:</h5>
                           {category.books && category.books.length > 0 ? (
                               <ul className="list-group">
-                                {category.books.map(book => (
-                                    <li key={book.id} className="list-group-item">
+                                {category.books.map((book, index) => (
+                                    <li key={index} className="list-group-item">
                                       <strong>{book.title}</strong>
-                                      {book.author && (
-                                          <span className="text-muted ms-2">by {book.author.name}</span>
+                                      {book.authorName && (
+                                          <span className="text-muted ms-2">by {book.authorName}</span>
                                       )}
                                       {book.publicationYear && (
                                           <span className="text-muted ms-2">({book.publicationYear})</span>
