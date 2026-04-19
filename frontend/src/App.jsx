@@ -176,7 +176,7 @@ function App() {
         {/* Authors Section - One-to-Many Relationship */}
         {viewMode === 'authors' ? (
             <>
-              <h2 className="mb-3">📖 Authors and Their Books (One-to-Many)</h2>
+              <h2 className="mb-3">Authors and Their Books</h2>
               <div className="row">
                 {loading ? <div>Loading...</div> : authors.map(author => (
                     <div key={author.id} className="col-md-6 mb-3">
