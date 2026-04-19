@@ -268,6 +268,7 @@ function App() {
             </>
         )}
 
+
         {/* NEW: Categories Section - Many-to-Many Relationship (Shows what books each category has) */}
         <div className="mt-5">
           <hr className="my-4" />
