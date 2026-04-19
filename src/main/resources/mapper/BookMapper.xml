@@ -3,12 +3,27 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.library.repository.mybatis.BookMapper">
 
+    <resultMap id="BookResultMap" type="com.example.library.entity.Book">
+        <id property="id" column="id"/>
+        <result property="title" column="title"/>
+        <result property="isbn" column="isbn"/>
+        <result property="publicationYear" column="publication_year"/>
+        <association property="author" javaType="com.example.library.entity.Author">
+            <id property="id" column="author_id"/>
+            <result property="name" column="author_name"/>
+        </association>
+    </resultMap>
+
     <insert id="insert" useGeneratedKeys="true" keyProperty="id">
         INSERT INTO books (title, isbn, publication_year, author_id)
         VALUES (#{title}, #{isbn}, #{publicationYear}, #{author.id})
     </insert>
 
-    <select id="findByIdWithDetails" resultType="com.example.library.entity.Book">
-        SELECT * FROM books WHERE id = #{id}
+    <select id="findByIdWithDetails" resultMap="BookResultMap">
+        SELECT b.*, a.name as author_name
+        FROM books b
+                 LEFT JOIN authors a ON b.author_id = a.id
+        WHERE b.id = #{id}
     </select>
+
 </mapper>
