@@ -10,6 +10,6 @@ public class BookResponseDTO {
     private String title;
     private String isbn;
     private Integer publicationYear;
-    private String authorName;  // Add this field
+    private String authorName;
     private Set<String> categoryNames;
 }
