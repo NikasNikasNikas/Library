@@ -35,7 +35,6 @@ public class BookService {
         book.setPublicationYear(dto.getPublicationYear());
         book.setAuthor(author);
 
-        // Using JPA DAO (3.3.1)
         Book saved = jpaBookDao.save(book);
 
         BookResponseDTO response = new BookResponseDTO();
