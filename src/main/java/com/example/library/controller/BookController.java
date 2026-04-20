@@ -6,9 +6,11 @@ import com.example.library.entity.Category;
 import com.example.library.service.BookService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Scope;
 import org.springframework.web.bind.annotation.*;
 import java.util.Set;
 
+@Scope("request")
 @RestController
 @RequestMapping("/api/books")
 @CrossOrigin(origins = "http://localhost:5173")

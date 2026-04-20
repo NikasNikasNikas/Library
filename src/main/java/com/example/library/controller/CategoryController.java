@@ -5,9 +5,11 @@ import com.example.library.dto.CategoryResponseDTO;
 import com.example.library.service.CategoryService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Scope;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
+@Scope("request")
 @RestController
 @RequestMapping("/api/categories")
 @CrossOrigin(origins = "http://localhost:5173")
