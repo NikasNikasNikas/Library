@@ -31,7 +31,7 @@ public class BookController {
         return bookService.createBookWithMyBatis(dto);
     }
 
-    @PostMapping("/{bookId}/categories/{categoryId}")
+    @PostMapping("/{bookId}/categories/{categoryId}/jpa")
     public String addCategoryToBook(
             @PathVariable Long bookId,
             @PathVariable Long categoryId) {
@@ -39,4 +39,14 @@ public class BookController {
         bookService.addCategoryToBook(bookId, categoryId);
         return "Category added successfully!";
     }
+
+    @PostMapping("/{bookId}/categories/{categoryId}/mybatis")
+    public String addCategoryToBookWithMyBatis(
+            @PathVariable Long bookId,
+            @PathVariable Long categoryId) {
+        System.out.println("Adding category " + categoryId + " to book " + bookId + " using MyBatis");
+        bookService.addCategoryToBookWithMyBatis(bookId, categoryId);
+        return "Category added successfully using MyBatis!";
+    }
+
 }

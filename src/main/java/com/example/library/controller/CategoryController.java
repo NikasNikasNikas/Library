@@ -18,9 +18,15 @@ public class CategoryController {
 
     private final CategoryService categoryService;
 
-    @GetMapping
+    ///  This is the final table showing what category has which book
+    @GetMapping("/jpa")
     public List<CategoryResponseDTO> getAllCategories() {
         return categoryService.getAllCategories();
+    }
+
+    @GetMapping("/mybatis")
+    public List<CategoryResponseDTO> getAllCategoriesMyBatis() {
+        return categoryService.getAllCategoriesMyBatis();
     }
 
     @PostMapping

@@ -20,4 +20,7 @@ public class BookMyBatisDao {
         return bookMapper.findByIdWithDetails(id);
     }
 
+    public void addCategoryToBook(Long bookId, Long categoryId) {
+        bookMapper.addCategoryToBook(bookId, categoryId);
+    }
 }
