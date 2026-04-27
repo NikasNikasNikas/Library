@@ -10,5 +10,5 @@ public class AuthorResponseDTO {
     private String name;
     private String country;
     private LocalDate birthDate;
-    private List<BookResponseDTO> books;
+    private List<BookResponseDTO> books;  // Changed to use BookWithCategoriesDTO
 }
