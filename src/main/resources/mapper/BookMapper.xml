@@ -26,4 +26,10 @@
         WHERE b.id = #{id}
     </select>
 
+    <insert id="addCategoryToBook">
+        INSERT INTO book_categories (book_id, category_id)
+        VALUES (#{bookId}, #{categoryId})
+            ON CONFLICT (book_id, category_id) DO NOTHING
+    </insert>
+
 </mapper>

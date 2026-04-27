@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.library.repository.mybatis.CategoryMapper">
+
+    <!-- Result map for Category with its Books (many-to-many) -->
+    <resultMap id="CategoryWithBooksMap" type="com.example.library.entity.Category">
+        <id property="id" column="category_id"/>
+        <result property="name" column="category_name"/>
+        <result property="description" column="category_description"/>
+
+        <!-- Collection of books for this category (many-to-many) -->
+        <collection property="books" ofType="com.example.library.entity.Book" resultMap="BookWithAuthorMap"/>
+    </resultMap>
+
+    <!-- Find all categories with their books (EXACT same as JPA lazy loading result) -->
+    <select id="findAllWithBooks" resultMap="CategoryWithBooksMap">
+        SELECT DISTINCT
+            c.id as category_id,
+            c.name as category_name,
+            c.description as category_description,
+            b.id as book_id,
+            b.title as book_title,
+            b.isbn as book_isbn,
+            b.publication_year as book_publication_year,
+            a.id as author_id,
+            a.name as author_name,
+            a.birth_date as author_birth_date,
+            a.country as author_country
+        FROM categories c
+                 LEFT JOIN book_categories bc ON c.id = bc.category_id
+                 LEFT JOIN books b ON bc.book_id = b.id
+                 LEFT JOIN authors a ON b.author_id = a.id
+        ORDER BY c.id, b.id
+    </select>
+
+
+</mapper>

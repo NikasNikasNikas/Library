@@ -85,4 +85,19 @@ public class BookService {
         book.getCategories().add(category);
         jpaBookDao.save(book);
     }
+
+    @Transactional
+    public void addCategoryToBookWithMyBatis(Long bookId, Long categoryId) {
+        // Verify book exists
+        Book book = jpaBookDao.findById(bookId)
+                .orElseThrow(() -> new RuntimeException("Book not found with id: " + bookId));
+
+        // Verify category exists
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new RuntimeException("Category not found with id: " + categoryId));
+
+        // Use MyBatis to insert into junction table
+        myBatisBookDao.addCategoryToBook(bookId, categoryId);
+    }
+
 }

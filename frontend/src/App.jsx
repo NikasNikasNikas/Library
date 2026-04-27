@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { authorAPI, bookAPI, categoryAPI } from './services/api';
+import { useNavigate } from 'react-router-dom';
 
 function App() {
   const [authors, setAuthors] = useState([]);
@@ -12,7 +13,8 @@ function App() {
   const [viewMode, setViewMode] = useState('authors');
   const [selectedBookForCategory, setSelectedBookForCategory] = useState(null);
   const [selectedCategoryId, setSelectedCategoryId] = useState('');
-  const [refreshKey, setRefreshKey] = useState(0); // Force re-render
+  const [refreshKey, setRefreshKey] = useState(0); // Force re-renderconst navigate = useNavigate();
+    const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     title: '',
@@ -122,7 +124,19 @@ function App() {
       <div className="container mt-4">
         <h1 className="text-center mb-4">Library Management System</h1>
 
-        <div className="text-center mb-4">
+          <div className="d-flex justify-content-between align-items-center mb-4">
+              <h1 className="m-0">Library Management System</h1>
+
+          </div >
+          <div className="text mb-4">
+              <button
+                  className="btn btn-dark"
+                  onClick={() => navigate('/scope')}
+              >
+                  Go to Scope Demo
+              </button>
+          </div>
+        <div className="text mb-4">
           <button className="btn btn-primary" onClick={() => setShowForm(!showForm)}>
             {showForm ? 'Cancel' : '+ Add New Book'}
           </button>
@@ -173,7 +187,7 @@ function App() {
             </div>
         )}
 
-        {/* Authors Section - One-to-Many Relationship */}
+        {/* Authors Section - what books they have AAAAAAAAAA */}
         {viewMode === 'authors' ? (
             <>
               <h2 className="mb-3">Authors and Their Books</h2>
@@ -283,13 +297,13 @@ function App() {
             </>
         )}
 
-        {/* Categories Section - Many-to-Many Relationship */}
+        {/* Categories Section, what books do categories have  AAAAAAAAAAAAAAAA*/}
         <div className="mt-5">
           <hr className="my-4" />
           <h2 className="mb-3">Categories and Their Books</h2>
           <div className="row">
             {categories.length === 0 ? (
-                <div className="alert alert-info">No categories found. Add categories to see the many-to-many relationship.</div>
+                <div className="alert alert-info">No categories found.</div>
             ) : (
                 categories.map(category => (
                     <div key={category.id} className="col-md-6 mb-3">

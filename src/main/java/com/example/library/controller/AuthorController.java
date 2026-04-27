@@ -16,8 +16,13 @@ public class AuthorController {
 
     private final AuthorService authorService;
 
-    @GetMapping
+    @GetMapping("/jpa")
     public List<AuthorResponseDTO> getAllAuthors() {
         return authorService.getAllAuthors();
+    }
+
+    @GetMapping("/mybatis")
+    public List<AuthorResponseDTO> getAllAuthorsMyBatis() {
+        return authorService.getAllAuthorsMyBatis();
     }
 }

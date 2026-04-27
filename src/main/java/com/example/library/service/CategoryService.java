@@ -4,6 +4,7 @@ import com.example.library.dto.CategoryRequestDTO;
 import com.example.library.dto.CategoryResponseDTO;
 import com.example.library.entity.Category;
 import com.example.library.repository.CategoryRepository;
+import com.example.library.repository.mybatis.CategoryMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +16,9 @@ import java.util.stream.Collectors;
 public class CategoryService {
 
     private final CategoryRepository categoryRepository;
+    private final CategoryMapper categoryMapper;
+
+    // JPA METHODS
 
     @Transactional(readOnly = true)
     public List<CategoryResponseDTO> getAllCategories() {
@@ -33,6 +37,18 @@ public class CategoryService {
         Category saved = categoryRepository.save(category);
         return convertToDTO(saved);
     }
+
+    // MYBATIS METHODS
+
+    @Transactional(readOnly = true)
+    public List<CategoryResponseDTO> getAllCategoriesMyBatis() {
+        List<Category> categories = categoryMapper.findAllWithBooks();
+        return categories.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+
+    // DTO CONVERSION METHOD
 
     private CategoryResponseDTO convertToDTO(Category category) {
         CategoryResponseDTO dto = new CategoryResponseDTO();

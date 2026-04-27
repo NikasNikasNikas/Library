@@ -11,4 +11,6 @@ public interface BookMapper {
 
     Book findByIdWithDetails(@Param("id") Long id);
 
+    void addCategoryToBook(@Param("bookId") Long bookId, @Param("categoryId") Long categoryId);
+
 }

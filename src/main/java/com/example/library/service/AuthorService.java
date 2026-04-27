@@ -7,6 +7,7 @@ import com.example.library.entity.Author;
 import com.example.library.entity.Book;
 import com.example.library.entity.Category;
 import com.example.library.repository.AuthorRepository;
+import com.example.library.repository.mybatis.AuthorMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,7 +20,9 @@ import java.util.stream.Collectors;
 public class AuthorService {
 
     private final AuthorRepository authorRepository;
+    private final AuthorMapper authorMapper;
 
+    // JPA METHODS
     @Transactional(readOnly = true)
     public List<AuthorResponseDTO> getAllAuthors() {
         List<Author> authors = authorRepository.findAllWithBooks();
@@ -40,25 +43,17 @@ public class AuthorService {
         return convertToDTO(saved);
     }
 
-    @Transactional
-    public AuthorResponseDTO updateAuthor(Long id, AuthorRequestDTO requestDTO) {
-        Author author = authorRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Author not found with id: " + id));
+    // MYBATIS METHODS
 
-        author.setName(requestDTO.getName());
-        author.setBirthDate(requestDTO.getBirthDate());
-        author.setCountry(requestDTO.getCountry());
-
-        Author updated = authorRepository.save(author);
-        return convertToDTO(updated);
+    @Transactional(readOnly = true)
+    public List<AuthorResponseDTO> getAllAuthorsMyBatis() {
+        List<Author> authors = authorMapper.findAllWithBooks();
+        return authors.stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
     }
 
-    @Transactional
-    public void deleteAuthor(Long id) {
-        Author author = authorRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Author not found with id: " + id));
-        authorRepository.delete(author);
-    }
+    // DTO CONVERSION METHODS
 
     @Transactional(readOnly = true)
     public AuthorResponseDTO getAuthorById(Long id) {
